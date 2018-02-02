@@ -21,6 +21,7 @@ ext_modules = [
         [ 
             'DynGillEpi/Utilities.cpp', 
             'DynGillEpi/SIS_Poisson_homogeneous.cpp', 
+            'DynGillEpi/DynGillEpi.cpp', 
         ],
         include_dirs=[
             get_pybind_include(),
