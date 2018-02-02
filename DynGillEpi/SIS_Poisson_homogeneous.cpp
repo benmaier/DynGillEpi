@@ -36,7 +36,7 @@ SI_result
     SIS_Poisson_homogeneous(size_t N,
                             CONTACTS_LIST contactListList,
                             double infection_rate_per_dt,
-                            double recovery_rate_per_dt
+                            double recovery_rate_per_dt,
                             size_t T_simulation,
                             size_t output_time_resolution,
                             size_t number_of_simulations,
@@ -47,8 +47,8 @@ SI_result
             )
 {
     // Set parameter values as specified:
-    double beta = infection_rate;
-    double mu = recovery_rate;
+    double beta = infection_rate_per_dt;
+    double mu = recovery_rate_per_dt;
     COUNTER ensembleSize = number_of_simulations; //ensemble size (number of realizations)
     COUNTER outputTimeResolution = output_time_resolution; //output time-resolution
 
@@ -77,8 +77,13 @@ SI_result
     NODES::iterator node_iterator; //iterator over list of nodes
     NODES::iterator last; //iterator for use when generating unique list of new infected nodes
     // Containers for output data:
-    vector < vector < size_t > > sumI_t(number_of_simulations,T_simulation/outputTimeResolution); //list of number of infected nodes in each recorded frame
-    vector < vector < size_t > > sumSI_t(number_of_simulations,T_simulation/outputTimeResolution); //list of number of infected nodes in each recorded frame
+    vector < vector < size_t > > sumI_t(number_of_simulations); //list of number of infected nodes in each recorded frame
+    vector < vector < size_t > > sumSI_t(number_of_simulations); //list of number of infected nodes in each recorded frame
+    for(size_t simulation = 0; simulation < number_of_simulations ; ++simulation)
+    {
+        sumI_t[simulation].resize(T_simulation/outputTimeResolution);
+        sumSI_t[simulation].resize(T_simulation/outputTimeResolution);
+    }
     vector < size_t > hist_I(number_of_simulations); //histogram of R values after I=0
     // Random number generators:
     //
@@ -123,7 +128,7 @@ SI_result
         Mu = mu*initial_number_of_infected;
 
        // First waiting time:
-        tau = randexp(1);
+        tau = randexp(generator);
         // set simulation time to zero:
         t = 0;
 
@@ -171,6 +176,7 @@ SI_result
                         xi-=tau/Lambda; //fraction of time-step left after transition
                         r_transitionType = Lambda * rand(generator); //random variable for weighted sampling of transitions
                         if(r_transitionType<Beta) //S->I
+                        {
                         
                             m = (int) SI * rand(generator); //transition m
                             // Add infected node to lists:
@@ -254,7 +260,7 @@ SI_result
 
     if (verbose)
     {
-        std::cout << std::endl << "temporal Gillespie---homogeneous & Poissonian SIS: N=" << N << ", T=" << T_data << ", beta=" << beta << ", mu=" << mu << ", resolution = " << outputTimeResolution << std::endl;
+        std::cout << std::endl << "temporal Gillespie---homogeneous & Poissonian SIS: N=" << N << ", beta=" << beta << ", mu=" << mu << ", resolution = " << outputTimeResolution << std::endl;
         std::cout << "Simulation time: " << t_simu << ", Stopped: " << stopped << "/" << ensembleSize << std::endl;
         std::cout << "Writing to file: " << t_write << std::endl;
     }

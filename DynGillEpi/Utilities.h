@@ -41,7 +41,7 @@
 
 using namespace std;
 
-struct SI_Result {
+struct SI_result {
     vector < vector < size_t > > I;
     vector < vector < size_t > > SI;
     vector < size_t > hist;
@@ -55,7 +55,7 @@ typedef unsigned int COUNTER;
 typedef unsigned int NODE;
 typedef vector<NODE> NODES; // list of nodes
 typedef vector<bool> BOOLS;
-typedef CONTACT pair<NODE>; // contact (i,j)
+typedef pair<NODE,NODE> CONTACT; // contact (i,j)
 typedef vector<CONTACT> CONTACTS; // contacts in a single time-frame
 typedef vector<CONTACTS> CONTACTS_LIST; // list of contact lists
 // Random number generators:
@@ -69,8 +69,8 @@ vector<size_t>::iterator choose_random_unique(
         vector<size_t>::iterator begin, 
         vector<size_t>::iterator end, 
         size_t num_random,
-        default_random_engine & generator,
-        uniform_real_distribution<double> & distribution
+        ENG & generator,
+        DIST_REAL & distribution
     );
 
 #endif

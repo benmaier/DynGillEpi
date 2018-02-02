@@ -6,7 +6,7 @@ SI_result
     SIS_Poisson_homogeneous(size_t N,
                             CONTACTS_LIST contactListList,
                             double infection_rate_per_dt,
-                            double recovery_rate_per_dt
+                            double recovery_rate_per_dt,
                             size_t T_simulation,
                             size_t output_time_resolution,
                             size_t number_of_simulations = 1,
