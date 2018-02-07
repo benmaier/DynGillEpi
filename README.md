@@ -1,6 +1,6 @@
 # DynGillEpi
 
-Python wrapper for the Gillespie contagion functions developed and written by CL Vestergaard and M Génois in [http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004579](Temporal Gillespie Algorithm: Fast Simulation of Contagion Processes on Time-Varying Networks)
+Python wrapper for the Gillespie contagion functions developed and written by CL Vestergaard and M Génois in [Temporal Gillespie Algorithm: Fast Simulation of Contagion Processes on Time-Varying Networks](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004579).
 Check out the original source code at https://github.com/CLVestergaard/TemporalGillespieAlgorithm.
 
 Note that I changed the source code in the way that all random number generators are now taken from the C++ standard library.
