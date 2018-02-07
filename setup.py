@@ -82,7 +82,7 @@ class BuildExt(build_ext):
 setup(
     name='DynGillEpi',
     version='0.0.1',
-    author='C. Vestergaard, M. Genois, Benjamin F. Maier',
+    author='C. Vestergaard, Benjamin F. Maier',
     author_email='bfmaier@physik.hu-berlin.de',
     url='https://github.com/benmaier/DynGillEpi',
     license='CC4',
