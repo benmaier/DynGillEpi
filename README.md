@@ -36,8 +36,8 @@ contact_list = [ [tuple(e) for e in nx.fast_gnp_random_graph(N_nodes,2./(N_nodes
 n_simulations = 100
 T_simulation = 100
 
-infection_rate = 10.
-recovery_rate = 1.
+infection_rate = 10. # number of events per SI-link per dt
+recovery_rate = 1.   # number of recoveries per infected per dt
 
 
 result = SIS(N_nodes,
