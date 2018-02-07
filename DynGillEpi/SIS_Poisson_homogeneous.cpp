@@ -222,6 +222,7 @@ SI_result
                         // Draw new renormalized waiting time:
                         tau = randexp(generator);
                     }
+                    tau -= xi*Lambda;
                 }
                 // Stop if I=0:
                 if(I==0)
