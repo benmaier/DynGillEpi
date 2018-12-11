@@ -50,6 +50,9 @@ PYBIND11_PLUGIN(DynGillEpi) {
 
     py::class_<SI_result>(m,"SI_result")
         .def(py::init<>())
+        .def_readwrite("true_I", &SI_result::true_I)
+        .def_readwrite("true_SI", &SI_result::true_SI)
+        .def_readwrite("true_t", &SI_result::true_t)
         .def_readwrite("I", &SI_result::I)
         .def_readwrite("SI", &SI_result::SI)
         .def_readwrite("hist", &SI_result::hist)

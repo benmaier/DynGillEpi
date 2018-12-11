@@ -27,7 +27,7 @@ recovered nodes at t=T_simulation-1.*/
 //======================================================================
 #include <Utilities.h>
 
-
+using namespace std;
 
 //======================================================================
 // Main:
@@ -77,6 +77,10 @@ SI_result
     NODES::iterator node_iterator; //iterator over list of nodes
     NODES::iterator last; //iterator for use when generating unique list of new infected nodes
     // Containers for output data:
+    vector < size_t > true_I;
+    vector < size_t > true_SI;
+    vector < double > true_t;
+    double this_true_t = 0.0;
     vector < vector < size_t > > sumI_t(number_of_simulations); //list of number of infected nodes in each recorded frame
     vector < vector < size_t > > sumSI_t(number_of_simulations); //list of number of infected nodes in each recorded frame
     for(size_t simulation = 0; simulation < number_of_simulations ; ++simulation)
@@ -121,7 +125,7 @@ SI_result
         for(size_t n=0; n<initial_number_of_infected; ++n)
         {
             infected.push_back(infected_nodes_for_shuffling[n]);
-            isInfected[n] = true;
+            isInfected[infected_nodes_for_shuffling[n]] = true;
         }
 
         I = initial_number_of_infected;
@@ -135,19 +139,47 @@ SI_result
         //--- Loop over list of contact lists: ---
         while(I>0 && t<T_simulation) //loop until either I=0 or t>=T_simu
         {
+            this_true_t = (double) t;
+
+            if (verbose)
+                cout << "========== loading new graph ===========" << endl;
+
+            if (verbose)
+            {
+                cout << "list of infected = [ ";
+                for(auto const &inf: infected)
+                    cout << inf << " ";
+                cout << "]" << endl;
+            }
+
             for(contactList_iterator=contactListList.begin()+t_infectionStart; contactList_iterator!=contactListList.end(); contactList_iterator++)
             {
                 // Create list of susceptible nodes in contact with infected nodes:
                 si_s.clear();
+                if (verbose)
+                {
+                    cout << "creating new list of SI-susceptibles" << endl;
+                    cout << " Graph has edge list = [ " << endl;
+                }
+
                 for(contact_iterator=(*contactList_iterator).begin(); contact_iterator!=(*contactList_iterator).end(); contact_iterator++)
                 {
+
                     i=(*contact_iterator).first;
                     j=(*contact_iterator).second;
+
+                    if (verbose)
+                    {
+                        //cout << "(" << i << " " << j << ") ";
+                        cout << "   now considering edge ( " << i << " " << j << " )" << endl;
+                    }
                     if(isInfected[i])
                     {
                         if(!isInfected[j])
                         {
                             si_s.push_back(j);
+                            if (verbose)
+                                cout << "   node " << i << " is infected and node " << j << " is susceptible, saving the latter" << endl;
                         }
                     }
                     else
@@ -155,17 +187,41 @@ SI_result
                         if(isInfected[j])
                         {
                             si_s.push_back(i);
+                            if (verbose)
+                                cout << "   node " << j << " is infected and node " << i << " is susceptible, saving the latter" << endl;
                         }
                     }
                 }
+
+                if (verbose)
+                    cout << "]" << endl;
+
                 SI=si_s.size(); //number of possible S->I transitions
+                true_t.push_back(this_true_t);
+                true_I.push_back(I);
+                true_SI.push_back(SI);
+
                 Beta=(double)SI*beta; //cumulative infection rate
                 Lambda=Beta+Mu; //cumulative transition rate
+                if (verbose)
+                {
+                    cout << "new list of SI-susceptibles = [ ";
+                    for(auto const &sus: si_s)
+                        cout << sus << " ";
+                    cout << "]" << endl;
+                    cout << "New SI = " << SI << endl;
+                    cout << "New Beta = " << Beta << endl;
+                    cout << "New Mu = " << Mu << endl;
+                    cout << "New Lambda = " << Lambda << endl;
+                }
 
                 // Check if transition takes place during time-step:
                 if(tau>=Lambda) //no transition takes place
                 {
                     tau-=Lambda;
+                    this_true_t += Lambda;
+                    if (verbose)
+                        cout << "no Gillespie event in this bin" << endl;
                 }
                 else //at least one transition takes place
                 {
@@ -173,8 +229,15 @@ SI_result
                     // Sampling step:
                     while(tau<xi*Lambda) //repeat if next tau is smaller than ~ Lambda-tau
                     {
+                        if (verbose)
+                        {
+                            cout << "============ New Gillespie Event ==============" << endl;
+                        }
                         xi-=tau/Lambda; //fraction of time-step left after transition
+                        this_true_t += tau/Lambda;
                         r_transitionType = Lambda * rand(generator); //random variable for weighted sampling of transitions
+                        if (verbose)
+                            cout << "r_transitionType = " << r_transitionType << endl;
                         if(r_transitionType<Beta) //S->I
                         {
                         
@@ -183,17 +246,32 @@ SI_result
                             isInfected[si_s[m]]=true;
                             infected.push_back(si_s[m]);
                             I++;
-                            Mu+=mu;
+                            if (verbose)
+                            {
+                                cout << "chose infection event" << endl;
+                                cout << "new infected = " << si_s[m] << "   (with index " << m << ")" << endl;
+                            }
                         }
                         else //I->R
                         {
                             m = (int) I * rand(generator); //transition m
                             isInfected[infected[m]]=false;
+                            if (verbose)
+                            {
+                                cout << "chose recovery event" << endl;
+                                cout << "new susceptible = " << infected[m] << "   (with index " << m << ")" << endl;
+                            }
                             // Remove drawn element from infected:
                             infected[m]=infected.back();
                             infected.pop_back();
                             I--;
-                            Mu-=mu;
+                        }
+                        if (verbose)
+                        {
+                            cout << "new list of infected = [ ";
+                            for(auto const &inf: infected)
+                                cout << inf << " ";
+                            cout << "]" << endl;
                         }
                         // Redo list of S->I transitions:
                         si_s.clear();
@@ -216,13 +294,32 @@ SI_result
                                 }
                             }
                         }
+                        if (verbose)
+                        {
+                            cout << "new list of SI-susceptibles = [ ";
+                            for(auto const &sus: si_s)
+                                cout << sus << " ";
+                            cout << "]" << endl;
+                        }
                         SI = si_s.size();
+                        true_t.push_back(this_true_t);
+                        true_I.push_back(I);
+                        true_SI.push_back(SI);
+                        Mu = I*mu;
                         Beta = (double)SI*beta;
                         Lambda = Beta+Mu; //new cumulative transition rate
                         // Draw new renormalized waiting time:
                         tau = randexp(generator);
+                        if (verbose)
+                        {
+                            cout << "New SI = " << SI << endl;
+                            cout << "New Beta = " << Beta << endl;
+                            cout << "New Mu = " << Mu << endl;
+                            cout << "New Lambda = " << Lambda << endl;
+                        }
                     }
                     tau -= xi*Lambda;
+                    this_true_t += xi*Lambda;
                 }
                 // Stop if I=0:
                 if(I==0)
@@ -267,6 +364,10 @@ SI_result
     }
 
     SI_result result;
+
+    result.true_I = true_I;
+    result.true_SI = true_SI;
+    result.true_t = true_t;
 
     result.I = sumI_t;
     result.SI = sumSI_t;

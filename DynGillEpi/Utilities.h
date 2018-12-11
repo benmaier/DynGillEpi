@@ -42,6 +42,10 @@
 using namespace std;
 
 struct SI_result {
+    vector < size_t > true_I;
+    vector < size_t > true_SI;
+    vector < double > true_t;
+
     vector < vector < size_t > > I;
     vector < vector < size_t > > SI;
     vector < size_t > hist;
@@ -59,7 +63,7 @@ typedef pair<NODE,NODE> CONTACT; // contact (i,j)
 typedef vector<CONTACT> CONTACTS; // contacts in a single time-frame
 typedef vector<CONTACTS> CONTACTS_LIST; // list of contact lists
 // Random number generators:
-typedef mt19937 ENG; // use Mersenne Twister 19937 as PRNG engine
+typedef default_random_engine ENG; // use Mersenne Twister 19937 as PRNG engine
 typedef uniform_int_distribution<size_t> DIST_INT; // define uniform distribution of integers
 typedef uniform_real_distribution<double> DIST_REAL; // define uniform distribution of reals on [0,1)
 typedef exponential_distribution<double> DIST_EXP; // define exponential distribution
